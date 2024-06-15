@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Barcode Scanner</title>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/browser@latest"></script>
+</head>
+
+<body>
+    <video id="video" width="300" height="200"></video>
+    <script type="text/javascript">
+        const codeReader = new ZXingBrowser.BrowserMultiFormatReader();
+        const videoElement = document.getElementById("video");
+
+        function scan() {
+            codeReader
+                .decodeFromStream(videoElement, "video", (result, error) => {
+                    if (result) {
+                        console.log("scanned val=>", result.text);
+                        window.postMessage({ type: 'scannedCode', data: result.text });
+                    }
+                    if (error) {
+                        console.error("error scan", error);
+                    }
+                })
+                .catch((err) => console.error(err));
+        }
+
+        // Start the video stream
+        navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: "environment" } })
+            .then((stream) => {
+                videoElement.srcObject = stream;
+                videoElement.play();
+                scan();
+            })
+            .catch((err) => console.error("Error accessing camera: ", err));
+    </script>
+</body>
+
+</html>
